@@ -1,0 +1,31 @@
+@import be.yannickdeturck.lagomshopscala.item.api.Item
+
+@(items: Seq[Item])(implicit messages: Messages)
+
+@main("Index") {
+    <h1>Index</h1>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Messages("item.title")</th>
+                <th>@Messages("item.description")</th>
+                <th>@Messages("item.price")</th>
+            </tr>
+        </thead>
+        <tbody>
+        @items.map { item =>
+            <tr>
+                <td><a type="button" href="@routes.ItemController.getItem(item.id.get)">@Messages("general.action.detail")</a></td>
+                <td>@item.title</td>
+                <td>@(if(item.description.length > 50) {
+                    s"${item.description.take(50)}..."
+                } else {
+                    item.description
+                })</td>
+                <td>@item.price</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

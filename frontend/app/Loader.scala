@@ -1,0 +1,54 @@
+import be.yannickdeturck.lagomshopscala.item.api.ItemService
+import com.lightbend.lagom.scaladsl.api.{ServiceAcl, ServiceInfo, ServiceLocator}
+import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
+import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
+import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
+import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
+import com.softwaremill.macwire._
+import controllers.{Assets, ItemController}
+import play.api.ApplicationLoader.Context
+import play.api.i18n.I18nComponents
+import play.api.libs.ws.ahc.AhcWSComponents
+import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, Mode}
+import router.Routes
+
+import scala.collection.immutable
+import scala.concurrent.ExecutionContext
+
+/**
+  * @author Yannick De Turck
+  */
+abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(context)
+  with I18nComponents
+  with AhcWSComponents
+  with LagomServiceClientComponents {
+
+  override lazy val serviceInfo: ServiceInfo = ServiceInfo(
+    "frontend",
+    Map(
+      "frontend" -> immutable.Seq(ServiceAcl.forPathRegex("(?!/api/).*"))
+    )
+  )
+  override implicit lazy val executionContext: ExecutionContext = actorSystem.dispatcher
+  override lazy val router = {
+    val prefix = "/"
+    wire[Routes]
+  }
+
+  lazy val itemService: ItemService = serviceClient.implement[ItemService]
+  lazy val itemController: ItemController = wire[ItemController]
+  lazy val assets: Assets = wire[Assets]
+}
+
+class FrontendLoader extends ApplicationLoader {
+  override def load(context: Context): Application = context.environment.mode match {
+    case Mode.Dev =>
+      (new Frontend(context) with LagomDevModeComponents).application
+    case _ =>
+      new Frontend(context) {
+        override lazy val circuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
+
+        override def serviceLocator: ServiceLocator = NoServiceLocator
+      }.application
+  }
+}

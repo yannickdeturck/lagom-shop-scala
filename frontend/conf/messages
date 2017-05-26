@@ -1,0 +1,20 @@
+# Main
+main.title=Lagom Shop
+
+# General
+general.action.detail=Detail
+
+general.form.errors=There are some errors in your form
+
+# Item
+item.id=ItemID
+item.title=Title
+item.description=Description
+item.price=Price
+
+item.error.invalid.id=An invalid ID was specified
+item.error.invalid.price=An invalid price was specified
+
+# Item.create
+item.create.title=Create item
+item.create.submit=Create item

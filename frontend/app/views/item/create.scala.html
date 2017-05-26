@@ -1,0 +1,20 @@
+@import helper._
+
+@(itemForm: Form[ItemForm])(implicit messages: Messages)
+
+@main(Messages("item.create.title")) {
+    <h2>@Messages("item.create.title")</h2>
+
+    @foundationForm(itemForm, routes.ItemController.createItem()) {
+        <div class="column row">
+            @inputText(itemForm("title"), '_label -> Messages("item.title"))
+        </div>
+        <div class="column row">
+            @textarea(itemForm("description"), '_label -> Messages("item.description"))
+        </div>
+        <div class="column row">
+            @inputText(itemForm("price"), '_label -> Messages("item.price"))
+        </div>
+        <input type="submit" class="button" value="@Messages("item.create.submit")"/>
+    }
+}

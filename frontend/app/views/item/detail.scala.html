@@ -1,0 +1,17 @@
+@import be.yannickdeturck.lagomshopscala.item.api.Item
+
+@(item: Item)(implicit messages: Messages)
+
+@main(item.title) {
+    <h1>@item.title</h1>
+    <p>
+        @item.description
+    </p>
+    <dl>
+        <dt>@Messages("item.id")</dt>
+        <dd>@item.id</dd>
+
+        <dt>@Messages("item.price")</dt>
+        <dd>@item.price</dd>
+    </dl>
+}
