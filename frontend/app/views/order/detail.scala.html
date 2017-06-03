@@ -1,0 +1,20 @@
+@import be.yannickdeturck.lagomshopscala.order.api.Order
+
+@(order: Order)(implicit messages: Messages)
+
+@main(Messages("order.detail.title")) {
+    <h1>@Messages("order.detail.title")</h1>
+    <dl>
+        <dt>@Messages("order.id")</dt>
+        <dd>@order.safeId</dd>
+
+        <dt>@Messages("order.item")</dt>
+        <dd>@order.itemId</dd>
+
+        <dt>@Messages("order.amount")</dt>
+        <dd>@order.amount</dd>
+
+        <dt>@Messages("order.customer")</dt>
+        <dd>@order.customer</dd>
+    </dl>
+}

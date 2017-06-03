@@ -1,11 +1,12 @@
 import be.yannickdeturck.lagomshopscala.item.api.ItemService
+import be.yannickdeturck.lagomshopscala.order.api.OrderService
 import com.lightbend.lagom.scaladsl.api.{ServiceAcl, ServiceInfo, ServiceLocator}
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.softwaremill.macwire._
-import controllers.{Assets, ItemController}
+import controllers.{Assets, ItemController, OrderController}
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -37,6 +38,8 @@ abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(c
 
   lazy val itemService: ItemService = serviceClient.implement[ItemService]
   lazy val itemController: ItemController = wire[ItemController]
+  lazy val orderService: OrderService = serviceClient.implement[OrderService]
+  lazy val orderController: OrderController = wire[OrderController]
   lazy val assets: Assets = wire[Assets]
 }
 

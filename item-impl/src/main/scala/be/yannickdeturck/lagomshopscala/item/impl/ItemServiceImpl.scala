@@ -38,7 +38,7 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     val itemEntityRef = registry.refFor[ItemEntity](id.toString)
     itemEntityRef.ask(GetItem).map {
       case Some(item) => convertItem(item)
-      case None => throw NotFound("Item " + id + " not found");
+      case None => throw NotFound(s"Item $id not found");
     }
   }
 

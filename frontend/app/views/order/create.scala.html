@@ -1,0 +1,20 @@
+@import helper._
+@import be.yannickdeturck.lagomshopscala.item.api.Item
+
+@(orderForm: Form[OrderForm], items: Seq[Item])(implicit messages: Messages)
+@main(Messages("order.create.title")) {
+    <h2>@Messages("order.create.title")</h2>
+
+    @foundationForm(orderForm, routes.OrderController.createOrder()) {
+        <div class="column row">
+            @select(orderForm("itemId"), options = items.map(i => (i.safeId.toString, i.title)), '_label -> Messages("order.item"))
+        </div>
+        <div class="column row">
+            @inputText(orderForm("amount"), '_label -> Messages("order.amount"))
+        </div>
+        <div class="column row">
+            @inputText(orderForm("customer"), '_label -> Messages("order.customer"))
+        </div>
+        <input type="submit" class="button" value="@Messages("order.create.submit")"/>
+    }
+}

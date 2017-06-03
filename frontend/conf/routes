@@ -2,10 +2,18 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+
+# TODO make decent index page
 # Items
 GET         /                           controllers.ItemController.index
 GET         /item                       controllers.ItemController.createItemForm
 POST        /item                       controllers.ItemController.createItem
 GET         /item/:id                   controllers.ItemController.getItem(id: java.util.UUID)
+
+# Orders
+GET         /orders                     controllers.OrderController.index
+GET         /order                      controllers.OrderController.createOrderForm
+POST        /order                      controllers.OrderController.createOrder
+GET         /order/:id                  controllers.OrderController.getOrder(id: java.util.UUID)
 
 GET         /assets/*file               controllers.Assets.at(path = "/public", file)

@@ -7,6 +7,7 @@ scalaVersion in ThisBuild := "2.11.8"
 val playJsonDerivedCodecs = "org.julienrf" %% "play-json-derived-codecs" % "3.3"
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.2.5" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
+val cassandraDriverExtras = "com.datastax.cassandra" % "cassandra-driver-extras" % "3.0.0" // Adds extra codecs
 
 lazy val `lagom-shop-scala` = (project in file("."))
   .aggregate(itemApi, itemImpl,
@@ -44,7 +45,33 @@ lazy val itemImpl = (project in file("item-impl"))
       lagomScaladslPersistenceCassandra,
       lagomScaladslTestKit,
       lagomScaladslKafkaBroker,
-      "com.datastax.cassandra" % "cassandra-driver-extras" % "3.0.0", // Adds extra codecs
+      cassandraDriverExtras,
+      macwire,
+      scalaTest
+    )
+  )
+  .settings(lagomForkedTestSettings: _*)
+
+lazy val orderApi = (project in file("order-api"))
+  .dependsOn(common)
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslApi,
+      playJsonDerivedCodecs
+    )
+  )
+
+lazy val orderImpl = (project in file("order-impl"))
+  .dependsOn(orderApi, itemApi)
+  .settings(commonSettings: _*)
+  .enablePlugins(LagomScala)
+  .settings(
+    libraryDependencies ++= Seq(
+      lagomScaladslPersistenceCassandra,
+      lagomScaladslTestKit,
+      lagomScaladslKafkaBroker,
+      cassandraDriverExtras,
       macwire,
       scalaTest
     )
@@ -52,7 +79,7 @@ lazy val itemImpl = (project in file("item-impl"))
   .settings(lagomForkedTestSettings: _*)
 
 lazy val frontend = (project in file("frontend"))
-  .dependsOn(itemApi)
+  .dependsOn(itemApi, orderApi)
   .settings(commonSettings: _*)
   .enablePlugins(PlayScala && LagomPlay)
   .settings(

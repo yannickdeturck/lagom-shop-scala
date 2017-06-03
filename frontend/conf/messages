@@ -18,3 +18,21 @@ item.error.invalid.price=An invalid price was specified
 # Item.create
 item.create.title=Create item
 item.create.submit=Create item
+
+# Order
+order.id=OrderID
+order.item=Item
+order.amount=Amount
+order.customer=Customer
+
+order.error.invalid.id=An invalid ID was specified
+
+# Order.index
+order.index.title=Orders
+
+# Order.detail
+order.detail.title=Order detail
+
+# Order.create
+order.create.title=Create order
+order.create.submit=Create order

@@ -50,8 +50,7 @@ private[impl] class ItemEventProcessor(session: CassandraSession, readSide: Cass
       .setPrepare(_ => prepareStatements())
       .setEventHandler[ItemCreated](e => {
       insertItem(e.event.item)
-    })
-      .build
+    }).build
   }
 
   def aggregateTags: Set[AggregateEventTag[ItemEvent]] = ItemEvent.Tag.allTags

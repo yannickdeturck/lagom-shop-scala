@@ -1,0 +1,29 @@
+@import be.yannickdeturck.lagomshopscala.order.api.Order
+
+@(orders: Seq[Order])(implicit messages: Messages)
+
+@main(Messages("order.index.title")) {
+    <h1>@Messages("order.index.title")</h1>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Messages("order.id")</th>
+                <th>@Messages("order.item")</th>
+                <th>@Messages("order.amount")</th>
+                <th>@Messages("order.customer")</th>
+            </tr>
+        </thead>
+        <tbody>
+        @orders.map { order =>
+            <tr>
+                <td><a type="button" href="@routes.OrderController.getOrder(order.safeId)">@Messages("general.action.detail")</a></td>
+                <td>@order.safeId</td>
+                <td>@order.itemId</td>
+                <td>@order.amount</td>
+                <td>@order.customer</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
