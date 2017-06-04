@@ -25,18 +25,15 @@ class OrderServiceImpl(registry: PersistentEntityRegistry, orderRepository: Orde
 
   override def createOrder = ServerServiceCall { input =>
     logger.info(s"Creating order with input $input...")
-    val getItem = itemService.getItem(input.itemId).invoke()
-      .recover { // TODO How to correctly catch this error?
-        case e: NotFound => throw new TransportException(TransportErrorCode.BadRequest, s"Invalid item specified")
-        case _ => throw new Exception("DA FAK")
-      }
-    getItem.flatMap { item =>
+    itemService.getItem(input.itemId).invoke().flatMap { item =>
       val id = UUIDs.timeBased()
       val order = Order(id, item.safeId, input.amount, input.customer)
       val orderEntityRef = registry.refFor[OrderEntity](id.toString)
       orderEntityRef.ask(CreateOrder(order)).map { _ =>
         convertOrder(order)
       }
+    }.recover {
+      case e: NotFound => throw new TransportException(TransportErrorCode.BadRequest, s"Invalid item specified")
     }
   }
 

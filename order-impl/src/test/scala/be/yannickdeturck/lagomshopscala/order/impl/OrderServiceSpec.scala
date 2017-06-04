@@ -10,7 +10,7 @@ import be.yannickdeturck.lagomshopscala.order.api.OrderService
 import com.datastax.driver.core.utils.UUIDs
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
-import com.lightbend.lagom.scaladsl.api.transport.NotFound
+import com.lightbend.lagom.scaladsl.api.transport.{BadRequest, NotFound}
 import com.lightbend.lagom.scaladsl.server.LocalServiceLocator
 import com.lightbend.lagom.scaladsl.testkit.ServiceTest
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
@@ -35,8 +35,8 @@ class OrderServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAl
           if (id == validItemId) {
             Future(Item(Some(id), "title", "description", BigDecimal.valueOf(25.00)))
           }
-          else { // TODO correct?
-            throw NotFound(s"Item $id not found")
+          else {
+            Future.failed(NotFound(s"Item $id not found"))
           }
         }
 
@@ -46,7 +46,6 @@ class OrderServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAl
       }
     }
   }
-
 
   val orderService: OrderService = server.serviceClient.implement[OrderService]
 
@@ -68,8 +67,8 @@ class OrderServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAl
       orderService.createOrder.invoke(api.Order(None, UUID.randomUUID(), 3, "Yannick")).map { order =>
         fail("no order should've been created")
       }.recoverWith {
-        case (err) =>
-          err should not be null
+        case (err: BadRequest) =>
+          err.exceptionMessage.detail should be ("Invalid item specified")
       }
     }
 
