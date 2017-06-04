@@ -5,8 +5,9 @@ import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
+import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaClientComponents
 import com.softwaremill.macwire._
-import controllers.{Assets, ItemController, OrderController}
+import controllers.{Assets, DashboardController, ItemController, OrderController}
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -22,6 +23,7 @@ import scala.concurrent.ExecutionContext
 abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(context)
   with I18nComponents
   with AhcWSComponents
+  with LagomKafkaClientComponents
   with LagomServiceClientComponents {
 
   override lazy val serviceInfo: ServiceInfo = ServiceInfo(
@@ -40,6 +42,7 @@ abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(c
   lazy val itemController: ItemController = wire[ItemController]
   lazy val orderService: OrderService = serviceClient.implement[OrderService]
   lazy val orderController: OrderController = wire[OrderController]
+  lazy val dashboardController: DashboardController = wire[DashboardController]
   lazy val assets: Assets = wire[Assets]
 }
 

@@ -8,7 +8,7 @@ import play.api.libs.json.{Format, Json}
   * @author Yannick De Turck
   */
 case class Order(id: Option[UUID], itemId: UUID, amount: Int, customer: String) {
-  def safeId: UUID = id.getOrElse(UUID.randomUUID()) // TODO should be time based UUID?
+  def safeId: UUID = id.getOrElse(UUID.randomUUID())
 }
 
 object Order {

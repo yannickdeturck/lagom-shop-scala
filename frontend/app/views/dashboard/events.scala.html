@@ -1,0 +1,20 @@
+@(events: Seq[String])(implicit messages: Messages)
+
+@main(Messages("dashboard.events.title")) {
+    <h1>@Messages("dashboard.events.title")</h1>
+    <a type="button" class="button" href="@routes.DashboardController.events()">@Messages("general.action.refresh")</a>
+    <table>
+        <thead>
+            <tr>
+                <th>@Messages("dashboard.event.events")</th>
+            </tr>
+        </thead>
+        <tbody>
+        @events.map { event =>
+            <tr>
+                <td>@event</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

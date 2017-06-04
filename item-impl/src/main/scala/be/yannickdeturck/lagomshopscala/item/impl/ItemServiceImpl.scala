@@ -60,6 +60,7 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     }
 
   private def convertItem(item: Item): api.Item = {
+    logger.info(s"Publishing event $item")
     api.Item(Some(item.id), item.title, item.description, item.price)
   }
 

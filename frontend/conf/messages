@@ -3,6 +3,7 @@ main.title=Lagom Shop
 
 # General
 general.action.detail=Detail
+general.action.refresh=Refresh
 
 general.form.errors=There are some errors in your form
 
@@ -36,3 +37,7 @@ order.detail.title=Order detail
 # Order.create
 order.create.title=Create order
 order.create.submit=Create order
+
+# Dashboard
+dashboard.events.title=Events Dashboard
+dashboard.event.events=Events

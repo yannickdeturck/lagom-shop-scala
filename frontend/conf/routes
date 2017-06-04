@@ -16,4 +16,7 @@ GET         /order                      controllers.OrderController.createOrderF
 POST        /order                      controllers.OrderController.createOrder
 GET         /order/:id                  controllers.OrderController.getOrder(id: java.util.UUID)
 
+# Dashboard
+GET         /dashboard                  controllers.DashboardController.events
+
 GET         /assets/*file               controllers.Assets.at(path = "/public", file)

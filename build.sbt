@@ -86,6 +86,7 @@ lazy val frontend = (project in file("frontend"))
     version := "1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
       lagomScaladslServer,
+      lagomScaladslKafkaClient,
       macwire,
       scalaTest,
       "org.webjars" % "foundation" % "6.2.3",

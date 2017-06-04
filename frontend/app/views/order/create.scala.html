@@ -3,7 +3,7 @@
 
 @(orderForm: Form[OrderForm], items: Seq[Item])(implicit messages: Messages)
 @main(Messages("order.create.title")) {
-    <h2>@Messages("order.create.title")</h2>
+    <h1>@Messages("order.create.title")</h1>
 
     @foundationForm(orderForm, routes.OrderController.createOrder()) {
         <div class="column row">

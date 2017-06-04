@@ -3,7 +3,7 @@
 @(itemForm: Form[ItemForm])(implicit messages: Messages)
 
 @main(Messages("item.create.title")) {
-    <h2>@Messages("item.create.title")</h2>
+    <h1>@Messages("item.create.title")</h1>
 
     @foundationForm(itemForm, routes.ItemController.createItem()) {
         <div class="column row">
