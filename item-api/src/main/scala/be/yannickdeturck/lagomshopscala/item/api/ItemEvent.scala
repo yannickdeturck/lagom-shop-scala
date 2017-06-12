@@ -19,6 +19,5 @@ object ItemCreated {
 }
 
 object ItemEvent {
-  implicit val format: Format[ItemEvent] =
-    derived.flat.oformat((__ \ "type").format[String])
+  implicit val format: Format[ItemEvent] = derived.flat.oformat((__ \ "type").format[String])
 }

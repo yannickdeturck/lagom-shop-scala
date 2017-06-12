@@ -24,13 +24,10 @@ trait ItemComponents extends LagomServerComponents with CassandraPersistenceComp
 
   override lazy val lagomServer: LagomServer = serverFor[ItemService](wire[ItemServiceImpl])
   lazy val itemRepository = wire[ItemRepository]
-  lazy val jsonSerializerRegistry = ItemSerializerRegistry
+  override lazy val jsonSerializerRegistry = ItemSerializerRegistry
 
   persistentEntityRegistry.register(wire[ItemEntity])
   readSide.register(wire[ItemEventProcessor])
-
-//  val lc = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
-//  StatusPrinter.print(lc)
 }
 
 abstract class ItemApplication(context: LagomApplicationContext) extends LagomApplication(context)

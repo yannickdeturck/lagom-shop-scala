@@ -1,10 +1,12 @@
 package be.yannickdeturck.lagomshopscala.item.impl
 
-import com.lightbend.lagom.scaladsl.server.LocalServiceLocator
-import com.lightbend.lagom.scaladsl.testkit.ServiceTest
+import akka.stream.scaladsl.Sink
+import com.lightbend.lagom.scaladsl.server.{LagomApplication, LocalServiceLocator}
+import com.lightbend.lagom.scaladsl.testkit.{ServiceTest, TestTopicComponents}
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
 import be.yannickdeturck.lagomshopscala.item.api
 import be.yannickdeturck.lagomshopscala.item.api.ItemService
+import play.api.libs.ws.ahc.AhcWSComponents
 
 import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
@@ -16,7 +18,7 @@ class ItemServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll
 
   private val server = ServiceTest.startServer(
     ServiceTest.defaultSetup.withCassandra(true)) { ctx =>
-    new ItemApplication(ctx) with LocalServiceLocator
+    new LagomApplication(ctx) with ItemComponents with LocalServiceLocator with AhcWSComponents with TestTopicComponents
   }
 
   val itemService: ItemService = server.serviceClient.implement[ItemService]
@@ -63,6 +65,26 @@ class ItemServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll
           }
         }
       }).flatMap(identity)
+    }
+
+    "publish items events on the topic" in {
+      implicit val system = server.actorSystem
+      implicit val mat = server.materializer
+
+      for {
+        createdItem <- itemService.createItem.invoke(api.Item(None, "title", "description", BigDecimal.valueOf(10L)))
+        events <- itemService.itemEvents.subscribe.atMostOnceSource
+          .filter(_.id == createdItem.safeId)
+          .take(1)
+          .runWith(Sink.seq)
+      } yield {
+        events.size shouldBe 1
+        events.head shouldBe an[api.ItemCreated]
+        val event = events.head.asInstanceOf[api.ItemCreated]
+        event.title should be("title")
+        event.description should be("description")
+        event.price should be(BigDecimal.valueOf(10L))
+      }
     }
   }
 

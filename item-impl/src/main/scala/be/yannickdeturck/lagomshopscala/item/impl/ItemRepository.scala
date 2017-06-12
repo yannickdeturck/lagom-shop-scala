@@ -44,16 +44,17 @@ private[impl] class ItemEventProcessor(session: CassandraSession, readSide: Cass
 
   private var insertItemStatement: PreparedStatement = _
 
-  def buildHandler: ReadSideProcessor.ReadSideHandler[ItemEvent] = {
+  override def buildHandler: ReadSideProcessor.ReadSideHandler[ItemEvent] = {
     readSide.builder[ItemEvent]("itemEventOffset")
       .setGlobalPrepare(createTables)
       .setPrepare(_ => prepareStatements())
       .setEventHandler[ItemCreated](e => {
-      insertItem(e.event.item)
-    }).build
+        insertItem(e.event.item)
+      })
+      .build
   }
 
-  def aggregateTags: Set[AggregateEventTag[ItemEvent]] = ItemEvent.Tag.allTags
+  override def aggregateTags: Set[AggregateEventTag[ItemEvent]] = ItemEvent.Tag.allTags
 
   private def createTables() = {
     logger.info("Creating tables...")

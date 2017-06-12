@@ -47,6 +47,11 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     itemRepository.selectAllItems.map(items => GetItemsResponse(items.map(convertItem)))
   }
 
+  private def convertItem(item: Item): api.Item = {
+    logger.info(s"Publishing event $item")
+    api.Item(Some(item.id), item.title, item.description, item.price)
+  }
+
   override def itemEvents: Topic[api.ItemEvent] =
     TopicProducer.taggedStreamWithOffset(ItemEvent.Tag.allTags.toList) { (tag, offset) =>
       logger.info("Creating ItemEvent Topic...")
@@ -58,11 +63,6 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
           }
         }.mapAsync(1)(convertEvent)
     }
-
-  private def convertItem(item: Item): api.Item = {
-    logger.info(s"Publishing event $item")
-    api.Item(Some(item.id), item.title, item.description, item.price)
-  }
 
   private def convertEvent(eventStreamElement: EventStreamElement[ItemEvent]): Future[(api.ItemEvent, Offset)] = {
     eventStreamElement match {
