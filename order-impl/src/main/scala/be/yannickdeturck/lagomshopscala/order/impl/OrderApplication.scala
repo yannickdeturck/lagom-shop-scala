@@ -18,27 +18,27 @@ import scala.concurrent.ExecutionContext
 /**
   * @author Yannick De Turck
   */
-//trait OrderComponents extends LagomServerComponents with CassandraPersistenceComponents {
-//  implicit def executionContext: ExecutionContext
-//
-//  def environment: Environment
-//
-//
-//}
+trait OrderComponents extends LagomServerComponents with CassandraPersistenceComponents {
+  implicit def executionContext: ExecutionContext
 
-abstract class OrderApplication(context: LagomApplicationContext) extends LagomApplication(context)
-  with AhcWSComponents
-  with CassandraPersistenceComponents
-  with LagomKafkaComponents {
+  def environment: Environment
 
   override lazy val lagomServer: LagomServer = serverFor[OrderService](wire[OrderServiceImpl])
   lazy val orderRepository = wire[OrderRepository]
-  lazy val jsonSerializerRegistry = OrderSerializerRegistry
+  override lazy val jsonSerializerRegistry = OrderSerializerRegistry
 
   persistentEntityRegistry.register(wire[OrderEntity])
   readSide.register(wire[OrderEventProcessor])
 
-  lazy val itemService: ItemService = serviceClient.implement[ItemService]
+  val itemService: ItemService
+}
+
+abstract class OrderApplication(context: LagomApplicationContext) extends LagomApplication(context)
+  with OrderComponents
+  with AhcWSComponents
+  with CassandraPersistenceComponents
+  with LagomKafkaComponents {
+  override lazy val itemService: ItemService = serviceClient.implement[ItemService]
 }
 
 class OrderApplicationLoader extends LagomApplicationLoader {

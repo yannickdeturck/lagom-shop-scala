@@ -3,6 +3,7 @@ package be.yannickdeturck.lagomshopscala.order.impl
 import java.util.UUID
 
 import akka.NotUsed
+import akka.stream.scaladsl.Sink
 import be.yannickdeturck.lagomshopscala.item.api.{GetItemsResponse, Item, ItemEvent, ItemService}
 import be.yannickdeturck.lagomshopscala.order
 import be.yannickdeturck.lagomshopscala.order.api
@@ -11,9 +12,10 @@ import com.datastax.driver.core.utils.UUIDs
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
 import com.lightbend.lagom.scaladsl.api.transport.{BadRequest, NotFound}
-import com.lightbend.lagom.scaladsl.server.LocalServiceLocator
-import com.lightbend.lagom.scaladsl.testkit.ServiceTest
+import com.lightbend.lagom.scaladsl.server.{LagomApplication, LocalServiceLocator}
+import com.lightbend.lagom.scaladsl.testkit.{ServiceTest, TestTopicComponents}
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
+import play.api.libs.ws.ahc.AhcWSComponents
 
 import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
@@ -24,18 +26,18 @@ import scala.concurrent.{Future, Promise}
 class OrderServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
   val validItemId: UUID = UUIDs.timeBased()
+  val otherValidItemId: UUID = UUIDs.timeBased()
 
   private val server = ServiceTest.startServer(
     ServiceTest.defaultSetup.withCassandra(true)) { ctx =>
-    new OrderApplication(ctx) with LocalServiceLocator {
-      override lazy val itemService = new ItemService {
+    new LagomApplication(ctx) with OrderComponents with LocalServiceLocator with AhcWSComponents with TestTopicComponents {
+      lazy val itemService = new ItemService {
         override def createItem: ServiceCall[Item, Item] = ???
 
         override def getItem(id: UUID): ServiceCall[NotUsed, Item] = ServiceCall { _ =>
-          if (id == validItemId) {
+          if (id == validItemId || id == otherValidItemId) {
             Future(Item(Some(id), "title", "description", BigDecimal.valueOf(25.00)))
-          }
-          else {
+          } else {
             Future.failed(NotFound(s"Item $id not found"))
           }
         }
@@ -99,6 +101,26 @@ class OrderServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAl
           }
         }
       }).flatMap(identity)
+    }
+
+    "publish order events on the topic" in {
+      implicit val system = server.actorSystem
+      implicit val mat = server.materializer
+
+      for {
+        createdOrder <- orderService.createOrder.invoke(api.Order(None, otherValidItemId, 5, "John"))
+        events <- orderService.orderEvents.subscribe.atMostOnceSource
+          .filter(_.id == createdOrder.safeId)
+          .take(1)
+          .runWith(Sink.seq)
+      } yield {
+        events.size shouldBe 1
+        events.head shouldBe an[api.OrderCreated]
+        val event = events.head.asInstanceOf[api.OrderCreated]
+        event.itemId should be(otherValidItemId)
+        event.amount should be(5)
+        event.customer should be("John")
+      }
     }
   }
 
