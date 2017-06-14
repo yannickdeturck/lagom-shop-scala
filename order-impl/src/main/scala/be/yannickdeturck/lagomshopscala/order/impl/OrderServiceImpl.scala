@@ -9,7 +9,7 @@ import be.yannickdeturck.lagomshopscala.order.api
 import com.datastax.driver.core.utils.UUIDs
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
-import com.lightbend.lagom.scaladsl.api.transport.{BadRequest, NotFound, TransportErrorCode, TransportException}
+import com.lightbend.lagom.scaladsl.api.transport.{NotFound, TransportErrorCode, TransportException}
 import com.lightbend.lagom.scaladsl.broker.TopicProducer
 import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentEntityRegistry}
 import com.lightbend.lagom.scaladsl.server.ServerServiceCall

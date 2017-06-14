@@ -7,6 +7,7 @@ import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
+import com.lightbend.lagom.scaladsl.pubsub.PubSubComponents
 import com.lightbend.lagom.scaladsl.server._
 import com.softwaremill.macwire._
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -17,7 +18,7 @@ import scala.concurrent.ExecutionContext
 /**
   * @author Yannick De Turck
   */
-trait ItemComponents extends LagomServerComponents with CassandraPersistenceComponents {
+trait ItemComponents extends LagomServerComponents with CassandraPersistenceComponents with PubSubComponents {
   implicit def executionContext: ExecutionContext
 
   def environment: Environment

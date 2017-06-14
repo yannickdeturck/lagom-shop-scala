@@ -45,6 +45,7 @@ lazy val itemImpl = (project in file("item-impl"))
       lagomScaladslPersistenceCassandra,
       lagomScaladslTestKit,
       lagomScaladslKafkaBroker,
+      lagomScaladslPubSub,
       cassandraDriverExtras,
       macwire,
       scalaTest

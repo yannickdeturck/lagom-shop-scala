@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import akka.Done
-import akka.stream.scaladsl.{Flow, Source}
+import akka.stream.scaladsl.Flow
 import be.yannickdeturck.lagomshopscala.item.api.{ItemEvent, ItemService}
 import be.yannickdeturck.lagomshopscala.order.api.{OrderEvent, OrderService}
 import org.slf4j.LoggerFactory
@@ -16,7 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * @author Yannick De Turck
   */
-class DashboardController @Inject()(val messagesApi: MessagesApi, itemService: ItemService, orderService: OrderService)(implicit ec: ExecutionContext) extends Controller with I18nSupport {
+class DashboardController @Inject()(val messagesApi: MessagesApi, itemService: ItemService,
+                                    orderService: OrderService)(implicit ec: ExecutionContext) extends Controller with I18nSupport {
 
   private val logger = LoggerFactory.getLogger(classOf[DashboardController])
 

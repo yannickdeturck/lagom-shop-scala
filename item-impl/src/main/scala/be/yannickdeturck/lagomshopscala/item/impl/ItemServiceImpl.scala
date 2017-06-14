@@ -4,14 +4,17 @@ import java.util.UUID
 
 import akka.NotUsed
 import akka.persistence.query.Offset
+import akka.stream.scaladsl.Source
 import be.yannickdeturck.lagomshopscala.item.api.{GetItemsResponse, ItemService}
 import be.yannickdeturck.lagomshopscala.item.api
 import com.datastax.driver.core.utils.UUIDs
 import com.lightbend.lagom.scaladsl.api.ServiceCall
 import com.lightbend.lagom.scaladsl.api.broker.Topic
+import com.lightbend.lagom.scaladsl.pubsub.TopicId
 import com.lightbend.lagom.scaladsl.api.transport.NotFound
 import com.lightbend.lagom.scaladsl.broker.TopicProducer
 import com.lightbend.lagom.scaladsl.persistence.{EventStreamElement, PersistentEntityRegistry}
+import com.lightbend.lagom.scaladsl.pubsub.PubSubRegistry
 import com.lightbend.lagom.scaladsl.server.ServerServiceCall
 import org.slf4j.LoggerFactory
 
@@ -20,7 +23,8 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * @author Yannick De Turck
   */
-class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRepository)(implicit ec: ExecutionContext) extends ItemService {
+class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRepository,
+                      pubSubRegistry: PubSubRegistry)(implicit ec: ExecutionContext) extends ItemService {
   private val logger = LoggerFactory.getLogger(classOf[ItemServiceImpl])
 
   override def createItem = ServerServiceCall { input =>
@@ -28,6 +32,8 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     val id = UUIDs.timeBased()
     val item = Item(id, input.title, input.description, input.price)
     val itemEntityRef = registry.refFor[ItemEntity](id.toString)
+    val topic = pubSubRegistry.refFor(TopicId[api.Item])
+    topic.publish(input)
     itemEntityRef.ask(CreateItem(item)).map { _ =>
       convertItem(item)
     }
@@ -76,5 +82,10 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
           ), offset)
         }
     }
+  }
+
+  override def itemStream: ServiceCall[NotUsed, Source[api.Item, NotUsed]] = ServiceCall { _ =>
+    val topic = pubSubRegistry.refFor(TopicId[api.Item])
+    Future.successful(topic.subscriber)
   }
 }

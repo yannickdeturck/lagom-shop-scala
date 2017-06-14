@@ -1,6 +1,7 @@
 package be.yannickdeturck.lagomshopscala.item.impl
 
 import akka.stream.scaladsl.Sink
+import akka.stream.testkit.scaladsl.TestSink
 import com.lightbend.lagom.scaladsl.server.{LagomApplication, LocalServiceLocator}
 import com.lightbend.lagom.scaladsl.testkit.{ServiceTest, TestTopicComponents}
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
@@ -67,7 +68,7 @@ class ItemServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll
       }).flatMap(identity)
     }
 
-    "publish items events on the topic" in {
+    "publish item events on the Kafka topic" in {
       implicit val system = server.actorSystem
       implicit val mat = server.materializer
 
@@ -84,6 +85,27 @@ class ItemServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll
         event.title should be("title")
         event.description should be("description")
         event.price should be(BigDecimal.valueOf(10L))
+      }
+    }
+
+    "publish newly created items on the PubSub topic" in {
+      itemService.itemStream.invoke.map { source =>
+        implicit val system = server.actorSystem
+        implicit val mat = server.materializer
+
+        val item1 = api.Item(None, "title", "description", BigDecimal.valueOf(10.50))
+        val item2 = api.Item(None, "title2", "description2", BigDecimal.valueOf(12.50))
+        val item3 = api.Item(None, "title3", "description3", BigDecimal.valueOf(15.50))
+        val probe = source.runWith(TestSink.probe)
+        probe.request(3)
+
+        itemService.createItem.invoke(item1)
+        itemService.createItem.invoke(item2)
+        itemService.createItem.invoke(item3)
+
+        probe.expectNextUnordered(item1, item2, item3)
+        probe.cancel()
+        succeed
       }
     }
   }
