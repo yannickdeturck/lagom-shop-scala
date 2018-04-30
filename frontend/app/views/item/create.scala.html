@@ -1,11 +1,12 @@
 @import helper._
 
-@(itemForm: Form[ItemForm])(implicit messages: Messages)
+@(itemForm: Form[ItemForm])(implicit request: RequestHeader, messages: Messages)
 
 @main(Messages("item.create.title")) {
     <h1>@Messages("item.create.title")</h1>
 
     @foundationForm(itemForm, routes.ItemController.createItem()) {
+        @CSRF.formField
         <div class="column row">
             @inputText(itemForm("title"), '_label -> Messages("item.title"))
         </div>

@@ -13,7 +13,7 @@ import play.api.libs.json.{Format, Json}
   */
 trait ItemService extends Service {
 
-  // Check services running: http://localhost:8000/services
+  // Check services running: http://localhost:9008/services
   def createItem: ServiceCall[Item, Item]
 
   def getItem(id: UUID): ServiceCall[NotUsed, Item]

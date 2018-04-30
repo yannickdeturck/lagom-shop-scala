@@ -32,10 +32,11 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     val id = UUIDs.timeBased()
     val item = Item(id, input.title, input.description, input.price)
     val itemEntityRef = registry.refFor[ItemEntity](id.toString)
+    logger.info(s"Publishing event $item")
     val topic = pubSubRegistry.refFor(TopicId[api.Item])
     topic.publish(input)
     itemEntityRef.ask(CreateItem(item)).map { _ =>
-      convertItem(item)
+      mapItem(item)
     }
   }
 
@@ -43,18 +44,17 @@ class ItemServiceImpl(registry: PersistentEntityRegistry, itemRepository: ItemRe
     logger.info(s"Looking up item with ID $id...")
     val itemEntityRef = registry.refFor[ItemEntity](id.toString)
     itemEntityRef.ask(GetItem).map {
-      case Some(item) => convertItem(item)
+      case Some(item) => mapItem(item)
       case None => throw NotFound(s"Item $id not found")
     }
   }
 
   override def getItems: ServiceCall[NotUsed, GetItemsResponse] = ServiceCall { _ =>
     logger.info("Looking up all items...")
-    itemRepository.selectAllItems.map(items => GetItemsResponse(items.map(convertItem)))
+    itemRepository.selectAllItems.map(items => GetItemsResponse(items.map(mapItem)))
   }
 
-  private def convertItem(item: Item): api.Item = {
-    logger.info(s"Publishing event $item")
+  private def mapItem(item: Item): api.Item = {
     api.Item(Some(item.id), item.title, item.description, item.price)
   }
 

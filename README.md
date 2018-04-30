@@ -14,6 +14,10 @@ Navigate to the root of the project and run `$ sbt`.
 
 Start up the project by executing `$ runAll`.
 
+Service are listed on [http://localhost:9008/services](http://localhost:9008/services).
+
+Frontend is available on [http://localhost:9000](http://localhost:9000).
+
 ## Importing the project in an IDE
 Import the project as an sbt project in your IDE.
 For more information, consult the official Lagom documentation on importing the project in [IntelliJ](https://www.lagomframework.com/documentation/1.3.x/scala/IntellijSbt.html) and [Eclipse](https://www.lagomframework.com/documentation/1.3.x/scala/EclipseSbt.html).

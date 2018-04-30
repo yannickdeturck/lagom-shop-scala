@@ -1,24 +1,25 @@
 package controllers
 
 import java.util.UUID
-import javax.inject.Inject
 
-import be.yannickdeturck.lagomshopscala.item.api.{ItemService}
+import javax.inject.Inject
+import be.yannickdeturck.lagomshopscala.item.api.ItemService
 import be.yannickdeturck.lagomshopscala.order.api.{Order, OrderService}
 import org.slf4j.LoggerFactory
 import play.api.data.Form
-import play.api.data.Forms.{mapping, optional, text, nonEmptyText, number}
+import play.api.data.Forms.{mapping, nonEmptyText, number, optional, text}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Controller, Request}
+import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 /**
   * @author Yannick De Turck
   */
-class OrderController @Inject()(val messagesApi: MessagesApi, orderService: OrderService,
-                                itemService: ItemService)(implicit ec: ExecutionContext) extends Controller with I18nSupport {
+class OrderController @Inject()(cc: ControllerComponents, orderService: OrderService,
+                                itemService: ItemService)(implicit ec: ExecutionContext)
+  extends AbstractController(cc) with I18nSupport {
 
   private val logger = LoggerFactory.getLogger(classOf[OrderController])
 

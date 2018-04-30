@@ -59,7 +59,5 @@ class OrderApplicationLoader extends LagomApplicationLoader {
       override def serviceLocator: ServiceLocator = NoServiceLocator
     }
 
-  override def describeServices = List(
-    readDescriptor[OrderService]
-  )
+  override def describeService = Some(readDescriptor[OrderService])
 }

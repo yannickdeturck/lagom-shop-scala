@@ -1,17 +1,18 @@
 import be.yannickdeturck.lagomshopscala.item.api.ItemService
 import be.yannickdeturck.lagomshopscala.order.api.OrderService
-import com.lightbend.lagom.scaladsl.api.{ServiceAcl, ServiceInfo, ServiceLocator}
+import com.lightbend.lagom.scaladsl.api.{LagomConfigComponent, ServiceAcl, ServiceInfo, ServiceLocator}
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
 import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaClientComponents
-import com.softwaremill.macwire._
-import controllers.{Assets, DashboardController, ItemController, OrderController}
+import com.softwaremill.macwire.wire
+import controllers.{AssetsComponents, DashboardController, ItemController, OrderController}
 import play.api.ApplicationLoader.Context
 import play.api.i18n.I18nComponents
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, Mode}
+import play.filters.HttpFiltersComponents
 import router.Routes
 
 import scala.collection.immutable
@@ -24,7 +25,10 @@ abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(c
   with I18nComponents
   with AhcWSComponents
   with LagomKafkaClientComponents
-  with LagomServiceClientComponents {
+  with LagomServiceClientComponents
+  with LagomConfigComponent
+  with HttpFiltersComponents
+  with AssetsComponents {
 
   override lazy val serviceInfo: ServiceInfo = ServiceInfo(
     "frontend",
@@ -33,7 +37,7 @@ abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(c
     )
   )
   override implicit lazy val executionContext: ExecutionContext = actorSystem.dispatcher
-  override lazy val router = {
+  override lazy val router: Routes = {
     val prefix = "/"
     wire[Routes]
   }
@@ -43,7 +47,6 @@ abstract class Frontend(context: Context) extends BuiltInComponentsFromContext(c
   lazy val orderService: OrderService = serviceClient.implement[OrderService]
   lazy val orderController: OrderController = wire[OrderController]
   lazy val dashboardController: DashboardController = wire[DashboardController]
-  lazy val assets: Assets = wire[Assets]
 }
 
 class FrontendLoader extends ApplicationLoader {

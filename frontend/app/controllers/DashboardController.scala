@@ -16,8 +16,10 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * @author Yannick De Turck
   */
-class DashboardController @Inject()(val messagesApi: MessagesApi, itemService: ItemService,
-                                    orderService: OrderService)(implicit ec: ExecutionContext) extends Controller with I18nSupport {
+class DashboardController @Inject()(cc: ControllerComponents,
+                                    itemService: ItemService,
+                                    orderService: OrderService)(implicit ec: ExecutionContext)
+  extends AbstractController(cc) with I18nSupport {
 
   private val logger = LoggerFactory.getLogger(classOf[DashboardController])
 

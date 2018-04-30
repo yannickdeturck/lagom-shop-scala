@@ -1,11 +1,12 @@
 @import helper._
 @import be.yannickdeturck.lagomshopscala.item.api.Item
 
-@(orderForm: Form[OrderForm], items: Seq[Item])(implicit messages: Messages)
+@(orderForm: Form[OrderForm], items: Seq[Item])(implicit requestHeader: RequestHeader, messages: Messages)
 @main(Messages("order.create.title")) {
     <h1>@Messages("order.create.title")</h1>
 
     @foundationForm(orderForm, routes.OrderController.createOrder()) {
+        @CSRF.formField
         <div class="column row">
             @select(orderForm("itemId"), options = items.map(i => (i.safeId.toString, i.title)), '_label -> Messages("order.item"))
         </div>

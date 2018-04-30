@@ -16,7 +16,8 @@ import scala.util.Try
 /**
   * @author Yannick De Turck
   */
-class ItemController @Inject()(val messagesApi: MessagesApi, itemService: ItemService)(implicit ec: ExecutionContext) extends Controller with I18nSupport {
+class ItemController @Inject()(cc: ControllerComponents, itemService: ItemService)(implicit ec: ExecutionContext)
+  extends AbstractController(cc) with I18nSupport {
 
   private val logger = LoggerFactory.getLogger(classOf[ItemController])
 
