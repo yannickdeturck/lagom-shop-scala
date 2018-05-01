@@ -9,6 +9,7 @@ import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.lightbend.lagom.scaladsl.server._
+import com.lightbend.rp.servicediscovery.lagom.scaladsl.LagomServiceLocatorComponents
 import com.softwaremill.macwire._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.{Environment, LoggerConfigurator}
@@ -24,8 +25,8 @@ trait OrderComponents extends LagomServerComponents with CassandraPersistenceCom
   def environment: Environment
 
   override lazy val lagomServer: LagomServer = serverFor[OrderService](wire[OrderServiceImpl])
-  lazy val orderRepository = wire[OrderRepository]
-  override lazy val jsonSerializerRegistry = OrderSerializerRegistry
+  lazy val orderRepository: OrderRepository = wire[OrderRepository]
+  override lazy val jsonSerializerRegistry: OrderSerializerRegistry.type = OrderSerializerRegistry
 
   persistentEntityRegistry.register(wire[OrderEntity])
   readSide.register(wire[OrderEventProcessor])
@@ -53,10 +54,8 @@ class OrderApplicationLoader extends LagomApplicationLoader {
   }
 
   override def load(context: LagomApplicationContext): LagomApplication =
-    new OrderApplication(context) {
+    new OrderApplication(context) with LagomServiceLocatorComponents {
       override lazy val circuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-
-      override def serviceLocator: ServiceLocator = NoServiceLocator
     }
 
   override def describeService = Some(readDescriptor[OrderService])

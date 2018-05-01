@@ -2,13 +2,12 @@ package be.yannickdeturck.lagomshopscala.item.impl
 
 import be.yannickdeturck.lagomshopscala.item.api.ItemService
 import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
-import com.lightbend.lagom.scaladsl.api.ServiceLocator
-import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
 import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.lightbend.lagom.scaladsl.pubsub.PubSubComponents
 import com.lightbend.lagom.scaladsl.server._
+import com.lightbend.rp.servicediscovery.lagom.scaladsl.LagomServiceLocatorComponents
 import com.softwaremill.macwire._
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.{Environment, LoggerConfigurator}
@@ -24,8 +23,8 @@ trait ItemComponents extends LagomServerComponents with CassandraPersistenceComp
   def environment: Environment
 
   override lazy val lagomServer: LagomServer = serverFor[ItemService](wire[ItemServiceImpl])
-  lazy val itemRepository = wire[ItemRepository]
-  override lazy val jsonSerializerRegistry = ItemSerializerRegistry
+  lazy val itemRepository: ItemRepository = wire[ItemRepository]
+  override lazy val jsonSerializerRegistry: ItemSerializerRegistry.type = ItemSerializerRegistry
 
   persistentEntityRegistry.register(wire[ItemEntity])
   readSide.register(wire[ItemEventProcessor])
@@ -48,10 +47,8 @@ class ItemApplicationLoader extends LagomApplicationLoader {
   }
 
   override def load(context: LagomApplicationContext): LagomApplication =
-    new ItemApplication(context) {
+    new ItemApplication(context) with LagomServiceLocatorComponents {
       override lazy val circuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-
-      override def serviceLocator: ServiceLocator = NoServiceLocator
     }
 
   override def describeService = Some(readDescriptor[ItemService])

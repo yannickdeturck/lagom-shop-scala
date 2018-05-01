@@ -1,11 +1,11 @@
 import be.yannickdeturck.lagomshopscala.item.api.ItemService
 import be.yannickdeturck.lagomshopscala.order.api.OrderService
-import com.lightbend.lagom.scaladsl.api.{LagomConfigComponent, ServiceAcl, ServiceInfo, ServiceLocator}
+import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
+import com.lightbend.lagom.scaladsl.api.{LagomConfigComponent, ServiceAcl, ServiceInfo}
+import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaClientComponents
 import com.lightbend.lagom.scaladsl.client.LagomServiceClientComponents
 import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
-import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
-import com.lightbend.lagom.scaladsl.api.ServiceLocator.NoServiceLocator
-import com.lightbend.lagom.scaladsl.broker.kafka.LagomKafkaClientComponents
+import com.lightbend.rp.servicediscovery.lagom.scaladsl.LagomServiceLocatorComponents
 import com.softwaremill.macwire.wire
 import controllers.{AssetsComponents, DashboardController, ItemController, OrderController}
 import play.api.ApplicationLoader.Context
@@ -54,10 +54,8 @@ class FrontendLoader extends ApplicationLoader {
     case Mode.Dev =>
       (new Frontend(context) with LagomDevModeComponents).application
     case _ =>
-      new Frontend(context) {
+      new Frontend(context) with LagomServiceLocatorComponents {
         override lazy val circuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-
-        override def serviceLocator: ServiceLocator = NoServiceLocator
       }.application
   }
 }

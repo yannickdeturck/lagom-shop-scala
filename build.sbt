@@ -39,7 +39,7 @@ lazy val itemApi = (project in file("item-api"))
 lazy val itemImpl = (project in file("item-impl"))
   .dependsOn(itemApi)
   .settings(commonSettings: _*)
-  .enablePlugins(LagomScala)
+  .enablePlugins(LagomScala, SbtReactiveAppPlugin)
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslPersistenceCassandra,
@@ -66,7 +66,7 @@ lazy val orderApi = (project in file("order-api"))
 lazy val orderImpl = (project in file("order-impl"))
   .dependsOn(orderApi, itemApi)
   .settings(commonSettings: _*)
-  .enablePlugins(LagomScala)
+  .enablePlugins(LagomScala, SbtReactiveAppPlugin)
   .settings(
     libraryDependencies ++= Seq(
       lagomScaladslPersistenceCassandra,
@@ -82,7 +82,7 @@ lazy val orderImpl = (project in file("order-impl"))
 lazy val frontend = (project in file("frontend"))
   .dependsOn(itemApi, orderApi)
   .settings(commonSettings: _*)
-  .enablePlugins(PlayScala && LagomPlay)
+  .enablePlugins(PlayScala && LagomPlay, SbtReactiveAppPlugin)
   .settings(
     version := "1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
@@ -93,7 +93,8 @@ lazy val frontend = (project in file("frontend"))
       "org.webjars" % "foundation" % "6.2.3",
       "org.webjars" % "foundation-icon-fonts" % "d596a3cfb3"
     ),
-    EclipseKeys.preTasks := Seq(compile in Compile)
+    EclipseKeys.preTasks := Seq(compile in Compile),
+    httpIngressPaths := Seq("/")
   )
 
 def commonSettings: Seq[Setting[_]] = Seq(
